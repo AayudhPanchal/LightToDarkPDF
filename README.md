@@ -7,14 +7,23 @@ a simple chrome extension that transforms bright pdf documents into comfortable 
 ### quick install
 
 1. **gather files**
-   - collect all files using ```git clone https://github.com/AayudhPanchal/LightToDarkPDF.git```
-   - required components(make sure that the following files exist in the folder):
-     - manifest.json - extension configuration
-     - popup.html/js - user interface
-     - content.js - handles pdf transformation
-     - colorUtils.js - color processing library
-     - background.js - manages extension behavior
-     - styles.css - visual styling
+   - clone the repository:
+   ```
+   git clone https://github.com/AayudhPanchal/LightToDarkPDF.git
+   ```
+   - ensure all required files are present:
+
+   ```
+   PDF Dark Mode/
+   ├── manifest.json     # extension configuration
+   ├── popup.html        # user interface
+   ├── popup.js          # interface functionality
+   ├── content.js        # pdf transformation logic
+   ├── colorUtils.js     # color processing library
+   ├── background.js     # extension management
+   ├── styles.css        # visual styling
+   └── README.md         # documentation
+   ```
 
 2. **add to chrome**
    - navigate to `chrome://extensions/`
