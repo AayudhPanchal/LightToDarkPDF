@@ -3,71 +3,112 @@ document.addEventListener('DOMContentLoaded', function() {
   const inversionStrength = document.getElementById('inversionStrength');
   const contrastLevel = document.getElementById('contrastLevel');
   
+  // Settings object to track changes
+  let currentSettings = {
+    darkMode: false,
+    inversionStrength: 95,
+    contrastLevel: 100
+  };
+  
+  // Debounce timer
+  let saveTimer = null;
+  
   // Load saved settings
   chrome.storage.sync.get(['darkMode', 'inversionStrength', 'contrastLevel'], function(data) {
-    darkModeToggle.checked = data.darkMode !== undefined ? data.darkMode : false;
-    inversionStrength.value = data.inversionStrength !== undefined ? data.inversionStrength : 95;
-    contrastLevel.value = data.contrastLevel !== undefined ? data.contrastLevel : 100;
+    currentSettings = {
+      darkMode: data.darkMode !== undefined ? data.darkMode : false,
+      inversionStrength: data.inversionStrength !== undefined ? data.inversionStrength : 95,
+      contrastLevel: data.contrastLevel !== undefined ? data.contrastLevel : 100
+    };
+    
+    // Update UI with loaded settings
+    darkModeToggle.checked = currentSettings.darkMode;
+    inversionStrength.value = currentSettings.inversionStrength;
+    contrastLevel.value = currentSettings.contrastLevel;
   });
   
-  // Save settings when changed
-  darkModeToggle.addEventListener('change', function() {
-    const isDarkMode = darkModeToggle.checked;
-    chrome.storage.sync.set({ darkMode: isDarkMode });
-    
-    // Send message to content script with a callback to confirm receipt
+  // Debounced save function to avoid hitting quota limits
+  function debouncedSaveSettings(settings) {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      chrome.storage.sync.set(settings);
+    }, 500); // Wait 500ms before saving
+  }
+  
+  // Send settings to content script
+  function sendSettingsToContentScript() {
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       if (tabs && tabs[0] && tabs[0].id) {
         chrome.tabs.sendMessage(
           tabs[0].id, 
           { 
-            action: 'toggleDarkMode', 
-            value: isDarkMode 
+            action: 'updateAllSettings', 
+            settings: currentSettings 
           },
           function(response) {
-            console.log('Toggle response:', response);
             // If no response, the content script might not be loaded
             if (chrome.runtime.lastError || !response) {
               console.log('No response from content script, injecting it');
-              // Inject the content script if it's not already there
-              chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                files: ['content.js']
-              });
+              try {
+                // Inject the content script if it's not already there
+                chrome.scripting.executeScript({
+                  target: { tabId: tabs[0].id },
+                  files: ['content.js']
+                }).then(() => {
+                  // Try sending the message again after script is injected
+                  setTimeout(() => {
+                    chrome.tabs.sendMessage(tabs[0].id, { 
+                      action: 'updateAllSettings', 
+                      settings: currentSettings
+                    });
+                  }, 100);
+                });
+              } catch (err) {
+                console.error('Error injecting script:', err);
+              }
             }
           }
         );
       }
     });
+  }
+  
+  // Save settings when changed
+  darkModeToggle.addEventListener('change', function() {
+    currentSettings.darkMode = darkModeToggle.checked;
+    
+    // Save settings (debounced)
+    debouncedSaveSettings(currentSettings);
+    
+    // Send message to content script
+    sendSettingsToContentScript();
   });
   
   // Use 'input' event instead of 'change' for real-time updates while sliding
   inversionStrength.addEventListener('input', function() {
-    chrome.storage.sync.set({ inversionStrength: inversionStrength.value });
+    currentSettings.inversionStrength = inversionStrength.value;
     
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, { 
-        action: 'updateSettings', 
-        settings: {
-          inversionStrength: inversionStrength.value,
-          contrastLevel: contrastLevel.value
-        }
-      });
-    });
+    // Update the UI in real-time but don't save on every change
+    sendSettingsToContentScript();
+  });
+  
+  // When the slider is released, save the settings
+  inversionStrength.addEventListener('change', function() {
+    // Save settings (debounced)
+    debouncedSaveSettings(currentSettings);
   });
   
   // Use 'input' event instead of 'change' for real-time updates while sliding
   contrastLevel.addEventListener('input', function() {
-    chrome.storage.sync.set({ contrastLevel: contrastLevel.value });
+    currentSettings.contrastLevel = contrastLevel.value;
     
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, { 
-        action: 'updateSettings', 
-        settings: {
-          inversionStrength: inversionStrength.value, // Fixed: was incorrectly using contrastLevel.value
-          contrastLevel: contrastLevel.value
-        }
-      });
-    });
+    // Update the UI in real-time but don't save on every change
+    sendSettingsToContentScript();
+  });
+  
+  // When the slider is released, save the settings
+  contrastLevel.addEventListener('change', function() {
+    // Save settings (debounced)
+    debouncedSaveSettings(currentSettings);
   });
 });

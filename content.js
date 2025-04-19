@@ -78,6 +78,31 @@ function init() {
       
       sendResponse({ status: 'success', settings: settings });
     }
+    else if (request.action === 'updateAllSettings') {
+      // Update all settings at once
+      const oldDarkModeSetting = settings.darkMode;
+      
+      settings = {
+        darkMode: request.settings.darkMode,
+        inversionStrength: request.settings.inversionStrength,
+        contrastLevel: request.settings.contrastLevel
+      };
+      
+      // Toggle dark mode if needed
+      if (settings.darkMode !== oldDarkModeSetting) {
+        if (settings.darkMode) {
+          applyDarkMode();
+        } else {
+          removeDarkMode();
+        }
+      } 
+      // Otherwise just update the visual settings
+      else if (settings.darkMode) {
+        updateDarkMode();
+      }
+      
+      sendResponse({ status: 'success', settings: settings });
+    }
     
     // Return true to indicate we'll respond asynchronously
     return true;
