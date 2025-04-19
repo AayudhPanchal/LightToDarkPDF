@@ -1,0 +1,36 @@
+/* CSS for the PDF Dark Mode extension */
+
+/* Style for PDF.js viewer when dark mode is enabled */
+.pdf-dark-mode-active .pdfViewer .page,
+.pdf-dark-mode-active #viewer.pdfViewer {
+  background-color: rgb(40, 44, 52) !important;
+  transition: filter 0.3s ease;
+}
+
+/* Override for PDF text when dark mode is enabled */
+.pdf-dark-mode-active .textLayer {
+  opacity: 0.9 !important;
+}
+
+/* Smooth transitions for real-time updates */
+embed[type="application/pdf"],
+#viewerContainer,
+.pdfViewer,
+.pdf-viewer,
+.pdf-dark-mode-canvas {
+  transition: filter 0.3s ease;
+}
+
+/* Style for the loader */
+.pdf-dark-mode-loader {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 4px;
+  z-index: 10000;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}

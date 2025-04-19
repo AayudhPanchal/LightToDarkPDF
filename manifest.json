@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "PDF Dark Mode",
+  "version": "1.0",
+  "description": "Converts PDF documents to dark mode for easier reading",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*.pdf", "*://*/*viewer.html*", "*://*/*pdfviewer*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["*.js", "*.css"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
