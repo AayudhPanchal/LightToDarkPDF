@@ -1,30 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PDF Dark Mode</title>
+  <title>pdf dark mode</title>
   <style>
-    body {
-      width: 200px;
-      padding: 10px;
-      font-family: Arial, sans-serif;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     }
+    
+    body {
+      width: 240px;
+      padding: 20px;
+      background-color: #000;
+      color: #f5f5f5;
+      border-radius: 8px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+      background-color: #e75e29;
+      border-radius: 50%;
+    }
+    
+    h1 {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+    
     .toggle-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 10px 0;
+      margin: 20px 0;
     }
+    
+    .label {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 4px;
+      letter-spacing: -0.2px;
+    }
+    
     .switch {
       position: relative;
       display: inline-block;
-      width: 50px;
-      height: 24px;
+      width: 40px;
+      height: 20px;
     }
+    
     .switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
+    
     .slider {
       position: absolute;
       cursor: pointer;
@@ -32,40 +72,86 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 24px;
+      background-color: #333;
+      transition: .2s;
+      border-radius: 20px;
     }
+    
     .slider:before {
       position: absolute;
       content: "";
       height: 16px;
       width: 16px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
+      left: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: .2s;
       border-radius: 50%;
     }
+    
     input:checked + .slider {
-      background-color: #2196F3;
+      background-color: #e75e29;
     }
+    
     input:checked + .slider:before {
-      transform: translateX(26px);
+      transform: translateX(20px);
     }
+    
     .settings {
-      margin-top: 15px;
+      margin-top: 24px;
     }
-    .settings h4 {
-      margin: 10px 0 5px 0;
+    
+    .setting-item {
+      margin-bottom: 16px;
+    }
+    
+    .range-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .range-value {
+      font-size: 12px;
+      width: 30px;
+      text-align: right;
+      color: #e75e29;
+    }
+    
+    input[type="range"] {
+      flex: 1;
+      margin-right: 8px;
+      height: 2px;
+      -webkit-appearance: none;
+      background-color: #333;
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      background-color: #e75e29;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    .footer {
+      font-size: 11px;
+      color: #555;
+      text-align: center;
+      margin-top: 20px;
+      letter-spacing: -0.2px;
     }
   </style>
 </head>
 <body>
-  <h2>PDF Dark Mode</h2>
+  <div class="header">
+    <div class="logo"></div>
+    <h1>pdf dark mode</h1>
+  </div>
   
   <div class="toggle-container">
-    <span>Dark Mode</span>
+    <span>dark mode</span>
     <label class="switch">
       <input type="checkbox" id="darkModeToggle">
       <span class="slider"></span>
@@ -73,11 +159,25 @@
   </div>
   
   <div class="settings">
-    <h4>Inversion Strength</h4>
-    <input type="range" id="inversionStrength" min="50" max="100" value="95">
+    <div class="setting-item">
+      <div class="label">intensity</div>
+      <div class="range-container">
+        <input type="range" id="inversionStrength" min="50" max="100" value="95">
+        <div id="inversionValue" class="range-value">95</div>
+      </div>
+    </div>
     
-    <h4>Contrast</h4>
-    <input type="range" id="contrastLevel" min="80" max="120" value="100">
+    <div class="setting-item">
+      <div class="label">contrast</div>
+      <div class="range-container">
+        <input type="range" id="contrastLevel" min="80" max="120" value="100">
+        <div id="contrastValue" class="range-value">100</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    transform pdfs // reduce eye strain
   </div>
 
   <script src="popup.js"></script>

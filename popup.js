@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const darkModeToggle = document.getElementById('darkModeToggle');
   const inversionStrength = document.getElementById('inversionStrength');
   const contrastLevel = document.getElementById('contrastLevel');
+  const inversionValue = document.getElementById('inversionValue');
+  const contrastValue = document.getElementById('contrastValue');
   
   // Settings object to track changes
   let currentSettings = {
@@ -25,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
     darkModeToggle.checked = currentSettings.darkMode;
     inversionStrength.value = currentSettings.inversionStrength;
     contrastLevel.value = currentSettings.contrastLevel;
+    inversionValue.textContent = currentSettings.inversionStrength;
+    contrastValue.textContent = currentSettings.contrastLevel;
   });
   
   // Debounced save function to avoid hitting quota limits
@@ -87,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Use 'input' event instead of 'change' for real-time updates while sliding
   inversionStrength.addEventListener('input', function() {
     currentSettings.inversionStrength = inversionStrength.value;
+    inversionValue.textContent = inversionStrength.value;
     
     // Update the UI in real-time but don't save on every change
     sendSettingsToContentScript();
@@ -101,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Use 'input' event instead of 'change' for real-time updates while sliding
   contrastLevel.addEventListener('input', function() {
     currentSettings.contrastLevel = contrastLevel.value;
+    contrastValue.textContent = contrastLevel.value;
     
     // Update the UI in real-time but don't save on every change
     sendSettingsToContentScript();
