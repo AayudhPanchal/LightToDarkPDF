@@ -64,6 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     chrome.tabs.sendMessage(tabs[0].id, { 
                       action: 'updateAllSettings', 
                       settings: currentSettings
+                    }, function(resp) {
+                      if (chrome.runtime.lastError) {
+                        console.warn('Still no receiver after injection:', chrome.runtime.lastError.message);
+                      }
                     });
                   }, 100);
                 });

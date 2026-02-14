@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PDF Dark Mode - Test Page</title>
+  <style>
+    body { background: white; color: black; font-family: Arial, sans-serif; padding: 20px; }
+    .page { width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; }
+    canvas { display: block; margin: 10px 0; background: #fff; }
+    img { max-width: 400px; display:block; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>PDF Dark Mode Test</h1>
+    <p>This page simulates a PDF containing text, an image and a canvas rendering.</p>
+    <canvas id="testCanvas" width="600" height="300"></canvas>
+    <img id="testImage" src="https://via.placeholder.com/400x200.png?text=Sample+Image" alt="sample">
+    <p>Adjust the extension toggle/slider to see recoloring.</p>
+  </div>
+
+  <script>
+    const c = document.getElementById('testCanvas');
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle = '#000000';
+    ctx.font = '40px serif';
+    ctx.fillText('Sample Canvas Text', 20, 80);
+
+    // draw a gradient rectangle
+    const g = ctx.createLinearGradient(0, 100, 600, 100);
+    g.addColorStop(0, '#ff0000');
+    g.addColorStop(1, '#0000ff');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 120, 600, 120);
+  </script>
+</body>
+</html>

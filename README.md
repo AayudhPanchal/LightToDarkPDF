@@ -38,3 +38,20 @@ a simple chrome extension that transforms bright pdf documents into comfortable 
    - now you're ready to transform pdfs
 
 once installed, simply open any pdf in chrome and click the extension icon to activate dark mode.
+
+## Local testing helper
+
+Open `test.html` to verify recoloring works without relying on the browser's built-in PDF viewer.
+
+- Serve the folder with a simple HTTP server (recommended):
+
+```bash
+# Python 3
+python -m http.server 8000
+
+# Then open http://localhost:8000/test.html in Chrome
+```
+
+- Alternatively, load `test.html` directly with `file://` URLs — enable "Allow access to file URLs" on the extension in `chrome://extensions` first.
+
+Watch the page console for debug logs from the content script ("Attempting pixel recolor...", "Recolor successful...", "Applying CSS filter...").

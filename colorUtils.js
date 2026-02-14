@@ -117,24 +117,33 @@ const ColorUtils = {
   invertColor: function(r, g, b, inversionStrength, contrastLevel) {
     // Convert to Lab
     const lab = this.rgbToLab(r, g, b);
-    
-    // Calculate color luminance - grayscale value
-    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-    
-    // Invert the L component (lightness)
-    lab.l = 100 - lab.l;
-    
-    // Apply inversion strength (0-100)
-    const strengthFactor = inversionStrength / 100;
-    lab.l = (lab.l * strengthFactor) + (lab.l * (1 - strengthFactor));
-    
-    // Apply contrast adjustment
-    const contrastFactor = contrastLevel / 100;
+
+    // Clamp inputs
+    const strength = Math.max(0, Math.min(100, Number(inversionStrength || 100)));
+    const contrast = Math.max(0, Math.min(300, Number(contrastLevel || 100)));
+
+    // Original L
+    const origL = lab.l;
+    // Target inverted L
+    const invertedL = 100 - origL;
+
+    // Interpolate between original and inverted using inversion strength (0-100)
+    const t = strength / 100;
+    let newL = origL * (1 - t) + invertedL * t;
+
+    // Apply contrast around midpoint (50)
+    const contrastFactor = contrast / 100;
     const midpoint = 50;
-    lab.l = midpoint + (lab.l - midpoint) * contrastFactor;
-    
+    newL = midpoint + (newL - midpoint) * contrastFactor;
+
+    // Ensure L is within valid range
+    newL = Math.max(0, Math.min(100, newL));
+
+    // Build new Lab color
+    const newLab = { l: newL, a: lab.a, b: lab.b };
+
     // Convert back to RGB
-    return this.labToRgb(lab.l, lab.a, lab.b);
+    return this.labToRgb(newLab.l, newLab.a, newLab.b);
   },
   
   // Calculate CIE2000 distance between two Lab colors
