@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const inversionValue = document.getElementById('inversionValue');
   const contrastValue = document.getElementById('contrastValue');
   
-  // Settings object to track changes
+  // Settings object to track changes (per-tab)
   let currentSettings = {
     darkMode: false,
     inversionStrength: 95,
@@ -15,27 +15,40 @@ document.addEventListener('DOMContentLoaded', function() {
   // Debounce timer
   let saveTimer = null;
   
-  // Load saved settings
-  chrome.storage.sync.get(['darkMode', 'inversionStrength', 'contrastLevel'], function(data) {
-    currentSettings = {
-      darkMode: data.darkMode !== undefined ? data.darkMode : false,
-      inversionStrength: data.inversionStrength !== undefined ? data.inversionStrength : 95,
-      contrastLevel: data.contrastLevel !== undefined ? data.contrastLevel : 100
-    };
-    
-    // Update UI with loaded settings
-    darkModeToggle.checked = currentSettings.darkMode;
-    inversionStrength.value = currentSettings.inversionStrength;
-    contrastLevel.value = currentSettings.contrastLevel;
-    inversionValue.textContent = currentSettings.inversionStrength;
-    contrastValue.textContent = currentSettings.contrastLevel;
-  });
+  // Load saved settings for the active tab
+  function loadSettingsForActiveTab() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (!tabs || !tabs[0] || !tabs[0].id) return;
+      const tabId = tabs[0].id;
+      const key = `tab_${tabId}`;
+      chrome.storage.local.get([key], function(data) {
+        const s = (data && data[key]) ? data[key] : currentSettings;
+        currentSettings = {
+          darkMode: s.darkMode !== undefined ? s.darkMode : currentSettings.darkMode,
+          inversionStrength: s.inversionStrength !== undefined ? s.inversionStrength : currentSettings.inversionStrength,
+          contrastLevel: s.contrastLevel !== undefined ? s.contrastLevel : currentSettings.contrastLevel
+        };
+        // Update UI with loaded settings
+        darkModeToggle.checked = currentSettings.darkMode;
+        inversionStrength.value = currentSettings.inversionStrength;
+        contrastLevel.value = currentSettings.contrastLevel;
+        inversionValue.textContent = currentSettings.inversionStrength;
+        contrastValue.textContent = currentSettings.contrastLevel;
+      });
+    });
+  }
+  loadSettingsForActiveTab();
   
   // Debounced save function to avoid hitting quota limits
   function debouncedSaveSettings(settings) {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      chrome.storage.sync.set(settings);
+      // Save settings for the active tab only
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        if (!tabs || !tabs[0] || !tabs[0].id) return;
+        const key = `tab_${tabs[0].id}`;
+        chrome.storage.local.set({ [key]: settings });
+      });
     }, 500); // Wait 500ms before saving
   }
   
@@ -43,13 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function sendSettingsToContentScript() {
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       if (tabs && tabs[0] && tabs[0].id) {
-        chrome.tabs.sendMessage(
-          tabs[0].id, 
-          { 
-            action: 'updateAllSettings', 
-            settings: currentSettings 
-          },
-          function(response) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'updateAllSettings', settings: currentSettings }, function(response) {
             // If no response, the content script might not be loaded
             if (chrome.runtime.lastError || !response) {
               console.log('No response from content script, injecting it');
@@ -61,10 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).then(() => {
                   // Try sending the message again after script is injected
                   setTimeout(() => {
-                    chrome.tabs.sendMessage(tabs[0].id, { 
-                      action: 'updateAllSettings', 
-                      settings: currentSettings
-                    }, function(resp) {
+                    chrome.tabs.sendMessage(tabs[0].id, { action: 'updateAllSettings', settings: currentSettings }, function(resp) {
                       if (chrome.runtime.lastError) {
                         console.warn('Still no receiver after injection:', chrome.runtime.lastError.message);
                       }
@@ -115,6 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update the UI in real-time but don't save on every change
     sendSettingsToContentScript();
   });
+
+  // When popup is opened, refresh UI if user switches tabs while popup is open
+  chrome.tabs.onActivated && chrome.tabs.onActivated.addListener(loadSettingsForActiveTab);
   
   // When the slider is released, save the settings
   contrastLevel.addEventListener('change', function() {

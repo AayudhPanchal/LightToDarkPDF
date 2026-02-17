@@ -398,15 +398,21 @@ html.pdf-dark-mode-active #viewer img { filter: invert(100%) hue-rotate(180deg) 
       return true; // indicate async response potential
     });
 
-    // Initialize from storage and immediately apply if needed
+    // Initialize by requesting per-tab settings from the background script
     function init() {
-      chrome.storage.sync.get(['darkMode', 'inversionStrength', 'contrastLevel'], (data) => {
-        window.settings.darkMode = data.darkMode !== undefined ? data.darkMode : window.settings.darkMode;
-        window.settings.inversionStrength = data.inversionStrength !== undefined ? data.inversionStrength : window.settings.inversionStrength;
-        window.settings.contrastLevel = data.contrastLevel !== undefined ? data.contrastLevel : window.settings.contrastLevel;
-
-        if (window.settings.darkMode) applyDarkMode();
-      });
+      try {
+        chrome.runtime.sendMessage({ action: 'requestTabSettings' }, (resp) => {
+          if (resp && resp.settings) {
+            const s = resp.settings;
+            window.settings.darkMode = s.darkMode !== undefined ? s.darkMode : window.settings.darkMode;
+            window.settings.inversionStrength = s.inversionStrength !== undefined ? s.inversionStrength : window.settings.inversionStrength;
+            window.settings.contrastLevel = s.contrastLevel !== undefined ? s.contrastLevel : window.settings.contrastLevel;
+            if (window.settings.darkMode) applyDarkMode();
+          }
+        });
+      } catch (e) {
+        // no-op
+      }
     }
 
     // Run init on DOM ready

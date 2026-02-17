@@ -11,12 +11,7 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
-    }
-  ],
+  
   "web_accessible_resources": [
     {
       "resources": [
