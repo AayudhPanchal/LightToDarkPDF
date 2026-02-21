@@ -38,3 +38,9 @@ a simple chrome extension that transforms bright pdf documents into comfortable 
    - now you're ready to transform pdfs
 
 once installed, simply open any pdf in chrome and click the extension icon to activate dark mode.
+
+## preview — light vs dark
+
+| light mode | dark mode |
+|:---:|:---:|
+| <p align="center">![light mode](images/light%20mode.png)</p> | <p align="center">![dark mode](images/dark%20mode.png)</p> |
